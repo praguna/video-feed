@@ -2,7 +2,6 @@ package kafka
 
 import "C"
 import (
-	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 	"os"
@@ -24,33 +23,29 @@ func Consumer(topics []string){
 		"go.application.rebalance.enable": true,
 	})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to create consumer: %s\n", err)
-		os.Exit(1)
+		log.Panicf("Failed to create consumer: %s\n", err)
 	}
-	fmt.Printf("Created Consumer %v\n", c)
+	log.Printf("Created Consumer %v\n", c)
 	err = c.SubscribeTopics(topics, nil)
 	for {
-		fmt.Println("kafka consumer active .....")
 		select {
 		case sig := <-sigchan:
-			fmt.Printf("Caught signal %v: terminating\n", sig)
+			log.Printf("Caught signal %v: terminating\n", sig)
 			_ = c.Close()
 			os.Exit(1)
 
 		case ev := <-c.Events():
 			switch e := ev.(type) {
 			case kafka.AssignedPartitions:
-				//fmt.Fprintf(os.Stderr, "%% %v\n", e)
 				c.Assign(e.Partitions)
 			case kafka.RevokedPartitions:
-				//fmt.Fprintf(os.Stderr, "%% %v\n", e)
 				c.Unassign()
 			case *kafka.Message:
 				handleRedis(*e.TopicPartition.Topic, string(e.Value))
 			case kafka.PartitionEOF:
-				fmt.Printf("%% Reached %v\n", e)
+				log.Printf("%% Reached %v\n", e)
 			case kafka.Error:
-				fmt.Fprintf(os.Stderr, "%% Error: %v\n", e)
+				log.Printf("%% Error: %v\n", e)
 			}
 		}
 	}
@@ -60,11 +55,12 @@ func handleRedis(topic string, value string){
 	switch topic {
 	case "likes":
 		err := redis.AddLike(value)
-		if err!= nil{
-			log.Print(err)
-		}else if err == redis.VideoNoError{
-			log.Print("Video Id Invalid")
+		if err == redis.VideoNoError{
+			log.Printf("Video Id Invalid : %v, topic : %v, id : %v",err,topic,value)
+		}else if err!= nil{
+			log.Println(err)
+		}else {
+			log.Printf("redis updated for topic %v : %v",topic,value)
 		}
-		log.Print("redis updated")
 	}
 }

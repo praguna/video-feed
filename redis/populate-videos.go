@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"fmt"
 	"github.com/gomodule/redigo/redis"
 	"log"
 	"math/rand"
@@ -22,22 +23,24 @@ func RandStringRunes(n int) string {
 }
 
 
-func Populate()  {
+func Populate(numRecords int)  {
 	conn, err := redis.Dial("tcp", "localhost:6379")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Error while creating connection with redis")
+		panic(err)
 	}
 	defer conn.Close()
 	categories := []string{"music","sports","news","food"}
-	ids := make([]string, 4)
+	ids := make([]string, numRecords)
 	log.Println("Adding ids : ")
 	for i,v := range categories {
 		ids[i] = RandStringRunes(7)
-		log.Printf("%v\n", ids[i])
-		_, err = conn.Do("HMSET", "video:"+ids[i], "title", "title:"+ RandStringRunes(7), "category" , v , "likes", 0)
+		log.Printf("video:%v\n", ids[i])
+		_, err = conn.Do("HSET", "video:"+ids[i], "title", RandStringRunes(7), "category" , v , "likes", 0)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println("Error while populating Redis")
+			panic(err)
 		}
 	}
-	log.Println("Finished Populating Redis with 4 entries !!")
+	fmt.Printf("Finished Populating Redis with %v entries\n", numRecords)
 }

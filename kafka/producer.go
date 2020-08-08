@@ -3,19 +3,25 @@ package kafka
 import (
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"os"
+	"log"
 )
 
-func Producer(topic string, value string){
-	broker := "localhost:9092,localhost:9093"
-	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
+var producer *kafka.Producer
+
+func InitProducer(){
+	broker := "localhost:9092"
+	var err error
+	producer,err =  kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
 	if err != nil{
-		fmt.Printf("Failed to create producer: %s\n", err)
-		os.Exit(1)
+		fmt.Println("Failed to create producer")
+		panic(err)
 	}
-	fmt.Printf("Created Producer %v\n", p)
+	log.Printf("Created Producer %v\n", producer)
+}
+
+func Produce(topic string, value string){
 	deliveryChan := make(chan kafka.Event)
-	err = p.Produce(&kafka.Message{
+	err := producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 		Value:          []byte(value),
 		Headers:        []kafka.Header{{Key: "videoFeed", Value: []byte("video feed header value")}},
@@ -25,10 +31,13 @@ func Producer(topic string, value string){
 	m := e.(*kafka.Message)
 
 	if m.TopicPartition.Error != nil {
-		fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
+		log.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
 	} else {
-		fmt.Printf("Delivered message to topic %s [%d] at offset %v\n",
+		log.Printf("Delivered message to topic %s [%d] at offset %v\n",
 			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
+	}
+	if err!=nil{
+		log.Printf("Error in writing value : %v \n",err)
 	}
 	close(deliveryChan)
 }

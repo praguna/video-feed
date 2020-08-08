@@ -1,41 +1,51 @@
 package main
 
 import (
+	"fmt"
+	"github.com/CrowdSurge/banner"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"video-feed/kafka"
 	"video-feed/redis"
 )
 
 func main() {
-	if len(os.Args) > 1{
+	if len(os.Args) > 2{
 		if os.Args[1] == "populate"{
-			redis.Populate()
+			numRecords,err := strconv.Atoi(os.Args[2])
+			if err!=nil{
+				fmt.Println( "Could not convert arguments provided, hence creating four entries")
+				numRecords = 4
+			}
+			redis.Populate(numRecords)
 			return
 		}
 	}
-	mux := http.NewServeMux()
-	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
+	router := mux.NewRouter()
+	router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Pong !!\n"))
 	})
 
-	mux.HandleFunc("/video", VideoHandler)
+	router.HandleFunc("/detail/{id}", VideoHandler)
 
-	mux.HandleFunc("/like", LikeHandler)
+	router.HandleFunc("/like/{id}", LikeHandler)
 
-	mux.HandleFunc("/popular", PopularHandler)
+	router.HandleFunc("/popular/{num[0-9]+}", PopularHandler)
 
-	mux.HandleFunc("/upload",func(w http.ResponseWriter, r *http.Request){
-		w.WriteHeader(200)
-		return
-	})
+
+	http.Handle("/", router)
+
+	banner.Print("video-feed")
 	log.Println("Initializing redis pool: ")
 	redis.Init()
+	go kafka.InitProducer()
 	go kafka.Consumer([]string{"likes", "upload"})
 	log.Println("Video-Feed Listening on :4000")
-	err := http.ListenAndServe(":4000", mux)
-	if err == nil {
+	err := http.ListenAndServe(":4000", nil)
+	if err != nil {
 		log.Printf("Server error %v :", err)
 	}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
 	"video-feed/kafka"
@@ -14,14 +15,14 @@ func VideoHandler(w http.ResponseWriter, r *http.Request){
 		http.Error(w, http.StatusText(405), 405)
 		return
 	}
-	id := r.URL.Query().Get("id")
+	id := mux.Vars(r)["id"]
 	if id == "" {
 		http.Error(w, http.StatusText(400), 400)
 		return
 	}
 	vd, err := redis.VideoDisplay(id)
 	if err == redis.VideoNoError {
-		http.NotFound(w, r)
+		http.Error(w, http.StatusText(400),400)
 		return
 	} else if err != nil {
 		http.Error(w, http.StatusText(500), 500)
@@ -37,17 +38,17 @@ func VideoHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func LikeHandler(w http.ResponseWriter, r *http.Request){
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", http.MethodPost)
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", http.MethodGet)
 		http.Error(w, http.StatusText(405), 405)
 		return
 	}
-	id := r.PostFormValue("id")
+	id := mux.Vars(r)["id"]
 	if id == "" {
 		http.Error(w, http.StatusText(400), 400)
 		return
 	}
-	go kafka.Producer("likes",id)
+	go kafka.Produce("likes",id)
 }
 
 func PopularHandler(w http.ResponseWriter, r *http.Request){
@@ -56,7 +57,7 @@ func PopularHandler(w http.ResponseWriter, r *http.Request){
 		http.Error(w, http.StatusText(405), 405)
 		return
 	}
-	x := r.URL.Query().Get("num")
+	x := mux.Vars(r)["num"]
 	if x == "" {
 		x = "3"
 	}
@@ -70,13 +71,18 @@ func PopularHandler(w http.ResponseWriter, r *http.Request){
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
+	c:=0
 	for i, vd := range vds{
 		if vd == nil{
-			return
+			break
 		}
 		_, err = fmt.Fprintf(w, "No->%d\n" +
 			"Title->%s\n"+
 			"category->%s\n"+
 			"likes->%d\n\n",i,vd.Title, vd.Category, vd.Likes)
+		c = c + 1
+	}
+	if c == 0{
+		fmt.Fprintln(w,"No video liked yet")
 	}
 }
