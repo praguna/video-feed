@@ -1,7 +1,6 @@
 package kafka
 
 import (
-	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 )
@@ -13,7 +12,7 @@ func InitProducer(){
 	var err error
 	producer,err =  kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
 	if err != nil{
-		fmt.Println("Failed to create producer")
+		log.Println("Failed to create producer")
 		panic(err)
 	}
 	log.Printf("Created Producer %v\n", producer)
