@@ -3,14 +3,8 @@ package redis
 import (
 	"fmt"
 	"github.com/gomodule/redigo/redis"
-	"log"
 	"math/rand"
-	"time"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567089")
 
@@ -32,10 +26,10 @@ func Populate(numRecords int)  {
 	defer conn.Close()
 	categories := []string{"music","sports","news","food"}
 	ids := make([]string, numRecords)
-	log.Println("Adding ids : ")
+	fmt.Println("Adding ids : ")
 	for i,v := range categories {
 		ids[i] = RandStringRunes(7)
-		log.Printf("video:%v\n", ids[i])
+		fmt.Printf("video:%v\n", ids[i])
 		_, err = conn.Do("HSET", "video:"+ids[i], "title", RandStringRunes(7), "category" , v , "likes", 0)
 		if err != nil {
 			fmt.Println("Error while populating Redis")
