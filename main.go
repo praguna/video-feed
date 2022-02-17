@@ -42,7 +42,7 @@ func main() {
 	log.Println("Initializing redis pool: ")
 	redis.Init()
 	go kafka.InitProducer()
-	go kafka.Consumer([]string{"likes", "upload"})
+	go kafka.Consumer([]string{"likes", "upload", "fame"})
 	log.Println("Video-Feed Listening on :4000")
 	err := http.ListenAndServe(":4000", nil)
 	if err != nil {
