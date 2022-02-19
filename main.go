@@ -1,23 +1,25 @@
 package main
+
 //////////
 import (
 	"fmt"
-	"github.com/CrowdSurge/banner"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"video-feed/kafka"
 	"video-feed/redis"
+
+	"github.com/CrowdSurge/banner"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	if len(os.Args) > 2{
-		if os.Args[1] == "populate"{
-			numRecords,err := strconv.Atoi(os.Args[2])
-			if err!=nil{
-				fmt.Println( "Could not convert arguments provided, hence creating four entries")
+	if len(os.Args) > 2 {
+		if os.Args[1] == "populate" {
+			numRecords, err := strconv.Atoi(os.Args[2])
+			if err != nil {
+				fmt.Println("Could not convert arguments provided, hence creating four entries")
 				numRecords = 4
 			}
 			redis.Populate(numRecords)
@@ -35,6 +37,15 @@ func main() {
 
 	router.HandleFunc("/popular/{num[0-9]+}", PopularHandler)
 
+	router.HandleFunc("/kafkaRedisServiceTest", KafkaRedisServiceTestHandler)
+
+	// router.HandleFunc("/readIncomingKafkaTopic", ReadIncomingKafkaTopicHandler)
+
+	// router.HandleFunc("/queryRedisCache", QueryRedisCacheHandler)
+
+	// router.HandleFunc("/reverseString", ReverseStringHandler)
+
+	// router.HandleFunc("/writeOutgoingKafkaTopic", WriteOutgoingKafkaTopicHandler)
 
 	http.Handle("/", router)
 
