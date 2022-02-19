@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"video-feed/kafka"
 	"video-feed/redis"
+
 	"github.com/gorilla/mux"
 )
 
