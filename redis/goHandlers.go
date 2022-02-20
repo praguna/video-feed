@@ -78,8 +78,9 @@ func SetMessage(message string) error {
 // 	return message
 // }
 
-func GetPopular(x int) ([]*Video, error) {
+func GetPopular() ([]*Video, error) {
 	conn := Pool.Get()
+	x := 10
 	defer conn.Close()
 	for {
 		_, err := conn.Do("WATCH", "likes")

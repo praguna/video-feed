@@ -38,7 +38,7 @@ func Populate(numRecords int) {
 	for i := 0; i < numRecords; i++ {
 		ids[i] = RandStringRunes(7)
 		fmt.Printf("video:%v\n", ids[i])
-		_, err = conn.Do("HSET", "video:"+ids[i], "title", RandStringRunes(7), GetRandomCategory(), "test", "likes", 0)
+		_, err = conn.Do("HSET", "video:"+ids[i], "title", RandStringRunes(7), GetRandomCategory(), "test", "likes", rand.Intn(50))
 		if err != nil {
 			fmt.Println("Error while populating Redis")
 			panic(err)

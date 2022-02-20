@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"video-feed/kafka"
 	"video-feed/redis"
 
@@ -52,6 +51,22 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 	go kafka.Produce("likes", id)
 }
 
+func AddMessageToKafkaTopic(w http.ResponseWriter, r *http.Request) {
+
+	// if r.Method != http.MethodGet {
+	// 	w.Header().Set("Allow", http.MethodGet)
+	// 	http.Error(w, http.StatusText(405), 405)
+	// 	return
+	// }
+	// id := mux.Vars(r)["message"]
+	// if id == "" {
+	// 	http.Error(w, http.StatusText(400), 400)
+	// 	return
+	// }
+	// message := mux.Vars(r)["message"]
+	go kafka.Produce("messages", "message")
+}
+
 func PopularHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
@@ -62,12 +77,12 @@ func PopularHandler(w http.ResponseWriter, r *http.Request) {
 	if x == "" {
 		x = "3"
 	}
-	xInt, err := strconv.Atoi(x)
-	if err != nil {
-		http.Error(w, http.StatusText(400), 400)
-		return
-	}
-	vds, err := redis.GetPopular(xInt)
+	// xInt, err := strconv.Atoi(x)
+	// if err != nil {
+	// 	http.Error(w, http.StatusText(400), 400)
+	// 	return
+	// }
+	vds, err := redis.GetPopular()
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 		return
@@ -86,9 +101,4 @@ func PopularHandler(w http.ResponseWriter, r *http.Request) {
 	if c == 0 {
 		fmt.Fprintln(w, "No video liked yet")
 	}
-}
-
-func AddMessageToKafkaTopic(w http.ResponseWriter, r *http.Request) {
-	message := mux.Vars(r)["message"]
-	go kafka.Produce("messages", message)
 }

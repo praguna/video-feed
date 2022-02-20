@@ -36,7 +36,7 @@ func main() {
 
 	router.HandleFunc("/like/{id}", LikeHandler)
 
-	router.HandleFunc("/popular/{num[0-9]+}", PopularHandler)
+	router.HandleFunc("/popular/", PopularHandler)
 
 	router.HandleFunc("/add-message-to-kafka-topic", AddMessageToKafkaTopic)
 
@@ -46,7 +46,7 @@ func main() {
 	log.Println("Initializing redis pool: ")
 	redis.Init()
 	go kafka.InitProducer()
-	go kafka.Consumer([]string{"likes", "upload", "fame"})
+	go kafka.Consumer([]string{"likes", "upload", "fame", "messages"})
 	log.Println("Video-Feed Listening on :4000")
 	err := http.ListenAndServe(":4000", nil)
 	if err != nil {
