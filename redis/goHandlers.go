@@ -2,13 +2,14 @@ package redis
 
 import (
 	"errors"
-	"github.com/gomodule/redigo/redis"
 	"log"
+
+	"github.com/gomodule/redigo/redis"
 )
 
 var VideoNoError = errors.New("no video found")
 
-func VideoDisplay(id string) (*Video,error){
+func VideoDisplay(id string) (*Video, error) {
 
 	conn := Pool.Get()
 	defer conn.Close()
@@ -19,14 +20,14 @@ func VideoDisplay(id string) (*Video,error){
 		return nil, VideoNoError
 	}
 	var video Video
-	err = redis.ScanStruct(values,&video)
+	err = redis.ScanStruct(values, &video)
 	if err != nil {
 		return nil, err
 	}
-	return &video,nil
+	return &video, nil
 }
 
-func AddLike(id string) error{
+func AddLike(id string) error {
 	conn := Pool.Get()
 	defer conn.Close()
 	exists, err := redis.Int(conn.Do("EXISTS", "video:"+id))
@@ -54,7 +55,30 @@ func AddLike(id string) error{
 	return nil
 }
 
-func GetPopular(x int) ([]*Video , error){
+func SetMessage(message string) error {
+	conn := Pool.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("HSET", "message", message)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// func GetMessage() {
+// 	// Issue a HGET command to retrieve the message
+// 	// and use the Str() helper method to convert the reply to a string.
+// 	conn := Pool.Get()
+// 	defer conn.Close()
+// 	message, err := redis.String(conn.Do("HGET", "message"))
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return message
+// }
+
+func GetPopular(x int) ([]*Video, error) {
 	conn := Pool.Get()
 	defer conn.Close()
 	for {
@@ -86,7 +110,7 @@ func GetPopular(x int) ([]*Video , error){
 		videos := make([]*Video, x)
 		for i, reply := range replies {
 			var video Video
-			if i == x{
+			if i == x {
 				break
 			}
 			err = redis.ScanStruct(reply.([]interface{}), &video)

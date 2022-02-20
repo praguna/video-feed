@@ -88,11 +88,7 @@ func PopularHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func KafkaRedisServiceTestHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.Header().Set("Allow", http.MethodGet)
-		http.Error(w, http.StatusText(405), 405)
-		return
-	}
-	w.Write([]byte("KafkaRedisServiceTestHandler"))
+func AddMessageToKafkaTopic(w http.ResponseWriter, r *http.Request) {
+	message := mux.Vars(r)["message"]
+	go kafka.Produce("messages", message)
 }

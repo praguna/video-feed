@@ -26,6 +26,7 @@ func main() {
 			return
 		}
 	}
+
 	router := mux.NewRouter()
 	router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Pong !!\n"))
@@ -37,15 +38,7 @@ func main() {
 
 	router.HandleFunc("/popular/{num[0-9]+}", PopularHandler)
 
-	router.HandleFunc("/kafkaRedisServiceTest", KafkaRedisServiceTestHandler)
-
-	// router.HandleFunc("/readIncomingKafkaTopic", ReadIncomingKafkaTopicHandler)
-
-	// router.HandleFunc("/queryRedisCache", QueryRedisCacheHandler)
-
-	// router.HandleFunc("/reverseString", ReverseStringHandler)
-
-	// router.HandleFunc("/writeOutgoingKafkaTopic", WriteOutgoingKafkaTopicHandler)
+	router.HandleFunc("/add-message-to-kafka-topic", AddMessageToKafkaTopic)
 
 	http.Handle("/", router)
 

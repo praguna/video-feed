@@ -2,15 +2,16 @@ package kafka
 
 import "C"
 import (
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"video-feed/redis"
+
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
-func Consumer(topics []string){
+func Consumer(topics []string) {
 	group := "videoFeed"
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
@@ -51,16 +52,23 @@ func Consumer(topics []string){
 	}
 }
 
-func handleRedis(topic string, value string){
+func handleRedis(topic string, value string) {
 	switch topic {
 	case "likes":
 		err := redis.AddLike(value)
-		if err == redis.VideoNoError{
-			log.Printf("Video Id Invalid : %v, topic : %v, id : %v",err,topic,value)
-		}else if err!= nil{
+		if err == redis.VideoNoError {
+			log.Printf("Video Id Invalid : %v, topic : %v, id : %v", err, topic, value)
+		} else if err != nil {
 			log.Println(err)
-		}else {
-			log.Printf("redis updated for topic %v : %v",topic,value)
+		} else {
+			log.Printf("redis updated for topic %v : %v", topic, value)
 		}
+		// case "messages":
+		// 	err := redis.AddMessage(value)
+		// 	if err != nil {
+		// 		log.Println(err)
+		// 	} else {
+		// 		log.Printf("redis updated for topic %v : %v", topic, value)
+		// 	}
 	}
 }
