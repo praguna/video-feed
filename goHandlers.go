@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"time"
 	"video-feed/kafka"
 	"video-feed/redis"
 
@@ -54,23 +53,13 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 
 func AddMessageToKafkaTopic(w http.ResponseWriter, r *http.Request) {
 
-	// if r.Method != http.MethodGet {
-	// 	w.Header().Set("Allow", http.MethodGet)
-	// 	http.Error(w, http.StatusText(405), 405)
-	// 	return
-	// }
-	// id := mux.Vars(r)["message"]
-	// if id == "" {
-	// 	http.Error(w, http.StatusText(400), 400)
-	// 	return
-	// }
-	// message := mux.Vars(r)["message"]
+	message, ok := r.URL.Query()["message"]
+	if !ok || len(message[0]) < 1 {
+		fmt.Println("Url Param message is missing")
+		return
+	}
 
-	a := "message-"
-	currentTime := time.Now()
-	b := currentTime.Format("2006-01-02 3:4:5")
-	c := a + b
-	go kafka.Produce("messages", c)
+	go kafka.Produce("messages", message[0])
 }
 
 func PopularHandler(w http.ResponseWriter, r *http.Request) {
