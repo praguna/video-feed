@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 	"video-feed/kafka"
 	"video-feed/redis"
 
@@ -64,7 +65,12 @@ func AddMessageToKafkaTopic(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 	// message := mux.Vars(r)["message"]
-	go kafka.Produce("messages", "message")
+
+	a := "message-"
+	currentTime := time.Now()
+	b := currentTime.Format("2006-01-02 3:4:5")
+	c := a + b
+	go kafka.Produce("messages", c)
 }
 
 func PopularHandler(w http.ResponseWriter, r *http.Request) {
