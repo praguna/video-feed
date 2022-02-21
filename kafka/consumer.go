@@ -2,6 +2,7 @@ package kafka
 
 import "C"
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -12,7 +13,7 @@ import (
 )
 
 func Consumer(topics []string) {
-	group := "videoFeed"
+	group := "messages"
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 	broker := "localhost:9092,localhost:9093"
@@ -53,22 +54,14 @@ func Consumer(topics []string) {
 }
 
 func handleRedis(topic string, value string) {
+	fmt.Println("\n\nInitializing Redis\n\n\n")
 	switch topic {
-	case "likes":
-		err := redis.AddLike(value)
-		if err == redis.VideoNoError {
-			log.Printf("Video Id Invalid : %v, topic : %v, id : %v", err, topic, value)
-		} else if err != nil {
+	case "messages":
+		err := redis.SetMessage(value)
+		if err != nil {
 			log.Println(err)
 		} else {
-			log.Printf("redis updated for topic %v : %v", topic, value)
+			log.Printf("\n\n\nSet %v topic in redis to '%v'\n\n ********* \n\nEND\n\n *********\n\n", topic, value)
 		}
-		// case "messages":
-		// 	err := redis.AddMessage(value)
-		// 	if err != nil {
-		// 		log.Println(err)
-		// 	} else {
-		// 		log.Printf("redis updated for topic %v : %v", topic, value)
-		// 	}
 	}
 }

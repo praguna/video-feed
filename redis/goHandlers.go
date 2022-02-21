@@ -59,7 +59,7 @@ func SetMessage(message string) error {
 	conn := Pool.Get()
 	defer conn.Close()
 
-	_, err := conn.Do("HSET", "message", message)
+	_, err := conn.Do("HSET", "messages", "message", message)
 	if err != nil {
 		return err
 	}
