@@ -43,7 +43,7 @@ func Consumer(topics []string) {
 			case kafka.RevokedPartitions:
 				c.Unassign()
 			case *kafka.Message:
-				handleRedis(*e.TopicPartition.Topic, string(e.Value))
+				runRedisSequence(*e.TopicPartition.Topic, string(e.Value))
 			case kafka.PartitionEOF:
 				log.Printf("%% Reached %v\n", e)
 			case kafka.Error:
@@ -53,8 +53,8 @@ func Consumer(topics []string) {
 	}
 }
 
-func handleRedis(topic string, value string) {
-	fmt.Println("\n\nInitializing Redis\n\n\n")
+func emitToRedis(topic string, value string) {
+	fmt.Println("\n\nEmitting to Redis\n\n\n")
 	switch topic {
 	case "messages":
 		err := redis.SetMessage(value)
@@ -64,4 +64,13 @@ func handleRedis(topic string, value string) {
 			log.Printf("\n\n\nSet %v topic in redis to '%v'\n\n ********* \n\nEND\n\n *********\n\n", topic, value)
 		}
 	}
+}
+
+func readFromRedis(topic string) {
+	fmt.Println("\n\nReading from Redis\n\n\n")
+}
+
+func runRedisSequence(topic string, value string) {
+	emitToRedis(topic, value)
+	readFromRedis(topic)
 }

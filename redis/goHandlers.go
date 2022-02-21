@@ -68,18 +68,18 @@ func SetMessage(message string) error {
 	return nil
 }
 
-// func GetMessage() {
-// 	// Issue a HGET command to retrieve the message
-// 	// and use the Str() helper method to convert the reply to a string.
-// 	conn := Pool.Get()
-// 	defer conn.Close()
-// 	message, err := redis.String(conn.Do("HGET", "message"))
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return message
-// }
+func GetMessage() (string, error) {
+	// Issue a HGET command to retrieve the message
+	// and use the Str() helper method to convert the reply to a string.
+	conn := Pool.Get()
+	defer conn.Close()
+	messages, err := redis.String(conn.Do("HGET", "messages", "message"))
+	if err != nil {
+		return "", err
+	}
 
+	return string(messages[0]), nil
+}
 func GetPopular() ([]*Video, error) {
 	conn := Pool.Get()
 	x := 10
