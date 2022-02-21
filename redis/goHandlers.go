@@ -60,26 +60,32 @@ func SetMessage(message string) error {
 	fmt.Println("Setting messages in redis")
 	conn := Pool.Get()
 	defer conn.Close()
-
-	_, err := conn.Do("HSET", "messenges", message, message)
+	key := "messages"
+	value := message
+	_, err := redis.String(conn.Do("SET", key, value, "EX", 6000))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetMessage() (string, error) {
+func GetMessage(topic string) (string, error) {
 	// Issue a HGET command to retrieve the message
 	// and use the Str() helper method to convert the reply to a string.
+	fmt.Println("getting message from ", topic)
 	conn := Pool.Get()
 	defer conn.Close()
-	messages, err := redis.String(conn.Do("HGET", "messages", "message"))
+	message, err := redis.String(conn.Do("GET", "messages"))
 	if err != nil {
 		return "", err
+	} else {
+		str := fmt.Sprintf("%v", message)
+		fmt.Println(str)
 	}
-
-	return string(messages[0]), nil
+	fmt.Println(message)
+	return message, nil
 }
+
 func GetPopular() ([]*Video, error) {
 	conn := Pool.Get()
 	x := 10

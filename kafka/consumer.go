@@ -68,6 +68,8 @@ func emitToRedis(topic string, value string) {
 
 func readFromRedis(topic string) {
 	fmt.Println("\n\nReading from Redis\n\n\n")
+	redis.GetMessage(topic)
+
 }
 
 func runRedisSequence(topic string, value string) {
