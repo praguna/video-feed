@@ -2,6 +2,7 @@ package redis
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/gomodule/redigo/redis"
@@ -56,10 +57,11 @@ func AddLike(id string) error {
 }
 
 func SetMessage(message string) error {
+	fmt.Println("Setting messages in redis")
 	conn := Pool.Get()
 	defer conn.Close()
 
-	_, err := conn.Do("HSET", "messages", "message", message)
+	_, err := conn.Do("HSET", "messenges", message, message)
 	if err != nil {
 		return err
 	}
