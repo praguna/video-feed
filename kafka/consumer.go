@@ -57,7 +57,7 @@ func emitToRedis(topic string, value string) {
 	fmt.Println("\n\nEmitting to Redis\n\n\n")
 	switch topic {
 	case "messages":
-		err := redis.SetMessage(value)
+		err := redis.SetRedisTopic(topic, value)
 		if err != nil {
 			log.Println(err)
 		} else {
@@ -65,7 +65,7 @@ func emitToRedis(topic string, value string) {
 		}
 	case "outgoing":
 		fmt.Println("IN OUTGOING")
-		err := redis.SetMessage(value)
+		err := redis.SetRedisTopic(topic, value)
 		if err != nil {
 			log.Println(err)
 		} else {
@@ -75,11 +75,10 @@ func emitToRedis(topic string, value string) {
 }
 func readFromRedis(topic string) (string, error) {
 	fmt.Println("\n\nReading from Redis\n\n\n")
-	result, err := redis.GetMessage(topic)
+	result, err := redis.GetRedisTopic(topic)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("RESULT: ", result)
 	return result, nil
 }
 func reverseString(str string) (string, error) {
@@ -101,10 +100,9 @@ func runRedisSequence(topic string, value string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("YAHOO")
-	fmt.Println(reversed)
 	// write reversed string to outgoing kafka topic
-	emitToRedis("outgoing", reversed)
+	Produce("outgoing", reversed)
+
 	return nil
 }
 
@@ -113,7 +111,6 @@ func ReadOutgoingFromRedis() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("outgoing!")
-	fmt.Println(outgoing)
+	// fmt.Println(outgoing)
 	return outgoing, nil
 }

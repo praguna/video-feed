@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -26,6 +27,8 @@ func InitProducer() {
 
 func Produce(topic string, value string) {
 	log.Printf("\n\n\n ********* \n\nSTART\n\n *********\n\n\n\n")
+
+	fmt.Println("Producing", topic, "as", value)
 	deliveryChan := make(chan kafka.Event)
 
 	err := producer.Produce(&kafka.Message{

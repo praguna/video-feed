@@ -8,12 +8,6 @@ import (
 
 var Pool *redis.Pool
 
-type Video struct {
-	Title    string `redis:"title"`
-	Category string `redis:"category"`
-	Likes    int    `redis:"likes"`
-}
-
 func Init() {
 	Pool = &redis.Pool{
 		MaxIdle:     10,
