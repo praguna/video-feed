@@ -66,13 +66,35 @@ func emitToRedis(topic string, value string) {
 	}
 }
 
-func readFromRedis(topic string) {
+func readFromRedis(topic string) (string, error) {
 	fmt.Println("\n\nReading from Redis\n\n\n")
-	redis.GetMessage(topic)
-
+	result, err := redis.GetMessage(topic)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("RESULT: ", result)
+	return result, nil
 }
-
-func runRedisSequence(topic string, value string) {
+func reverseString(str string) (string, error) {
+	rune_arr := []rune(str)
+	var rev []rune
+	for i := len(rune_arr) - 1; i >= 0; i-- {
+		rev = append(rev, rune_arr[i])
+	}
+	fmt.Println("Reverse: ", string(rev))
+	return string(rev), nil
+}
+func runRedisSequence(topic string, value string) error {
 	emitToRedis(topic, value)
-	readFromRedis(topic)
+	message, err := readFromRedis(topic)
+	if err != nil {
+		return err
+	}
+	reversed, err := reverseString(message)
+	if err != nil {
+		return err
+	}
+	fmt.Println("YAHOO")
+	fmt.Println(reversed)
+	return nil
 }
