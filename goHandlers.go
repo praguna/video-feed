@@ -6,7 +6,7 @@ import (
 	"video-feed/kafka"
 )
 
-func ProduceToOutgoingTopic(w http.ResponseWriter, r *http.Request) {
+func ProduceToIncomingTopic(w http.ResponseWriter, r *http.Request) {
 
 	message, ok := r.URL.Query()["message"]
 	if !ok || len(message[0]) < 1 {
@@ -17,6 +17,6 @@ func ProduceToOutgoingTopic(w http.ResponseWriter, r *http.Request) {
 	go kafka.Produce("messages", message[0])
 }
 
-// func ConsumeFromIncomingTopic(w http.ResponseWriter, r *http.Request){
+// func ConsumeFromOutgoingTopic(w http.ResponseWriter, r *http.Request){
 
 // }

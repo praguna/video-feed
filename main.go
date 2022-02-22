@@ -32,7 +32,7 @@ func main() {
 		w.Write([]byte("Pong !!\n"))
 	})
 
-	router.HandleFunc("/produce-to-outgoing-topic", ProduceToOutgoingTopic)
+	router.HandleFunc("/produce-to-incoming-topic", ProduceToIncomingTopic)
 
 	http.Handle("/", router)
 
