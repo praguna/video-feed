@@ -34,6 +34,8 @@ func main() {
 
 	router.HandleFunc("/produce-to-incoming-topic", ProduceToIncomingTopic)
 
+	router.HandleFunc("/consume-from-outgoing-topic", ConsumeFromOutgoingTopic)
+
 	http.Handle("/", router)
 
 	banner.Print("redis kafka")

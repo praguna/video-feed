@@ -17,6 +17,10 @@ func ProduceToIncomingTopic(w http.ResponseWriter, r *http.Request) {
 	go kafka.Produce("messages", message[0])
 }
 
-// func ConsumeFromOutgoingTopic(w http.ResponseWriter, r *http.Request){
-
-// }
+func ConsumeFromOutgoingTopic(w http.ResponseWriter, r *http.Request) {
+	result, err := kafka.ReadOutgoingFromRedis()
+	if err != nil {
+		fmt.Println("error")
+	}
+	w.Write([]byte(result))
+}
