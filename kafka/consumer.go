@@ -13,7 +13,7 @@ import (
 )
 
 func Consumer(topics []string) {
-	group := "messages"
+	group := "InboundTopic"
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 	broker := "localhost:9092,localhost:9093"
@@ -46,8 +46,8 @@ func Consumer(topics []string) {
 				fmt.Println("In consumer")
 				myTopic := *e.TopicPartition.Topic
 				fmt.Printf("myTopic Type = %T", myTopic)
-				if myTopic == "messages" {
-					runRedisSequence(*e.TopicPartition.Topic, string(e.Value))
+				if myTopic == "InboundTopic" {
+					saveRedisTriggerOutboundTopicKafka(*e.TopicPartition.Topic, string(e.Value))
 				} else {
 					emitToRedis(*e.TopicPartition.Topic, string(e.Value))
 				}
@@ -60,50 +60,9 @@ func Consumer(topics []string) {
 	}
 }
 
-func ConsumerOutgoing(topics []string) {
-	group := "outgoing"
-	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
-	broker := "localhost:9092,localhost:9093"
-	c, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers":               broker,
-		"group.id":                        group,
-		"session.timeout.ms":              6000,
-		"go.events.channel.enable":        true,
-		"go.application.rebalance.enable": true,
-	})
-	if err != nil {
-		log.Panicf("Failed to create consumer: %s\n", err)
-	}
-	log.Printf("Created Consumer %v\n", c)
-	err = c.SubscribeTopics(topics, nil)
-	for {
-		select {
-		case sig := <-sigchan:
-			log.Printf("Caught signal %v: terminating\n", sig)
-			_ = c.Close()
-			os.Exit(1)
-
-		case ev := <-c.Events():
-			switch e := ev.(type) {
-			case kafka.AssignedPartitions:
-				c.Assign(e.Partitions)
-			case kafka.RevokedPartitions:
-				c.Unassign()
-			case *kafka.Message:
-				runRedisSequence(*e.TopicPartition.Topic, string(e.Value))
-			case kafka.PartitionEOF:
-				log.Printf("%% Reached %v\n", e)
-			case kafka.Error:
-				log.Printf("%% Error: %v\n", e)
-			}
-		}
-	}
-}
-
 func emitToRedis(topic string, value string) {
 	fmt.Println("\n\nEmitting to Redis\n\n\n")
-	fmt.Println(("IN MESSAGES"))
+	fmt.Println(("IN InboundTopic"))
 	err := redis.SetRedisTopic(topic, value)
 	if err != nil {
 		log.Println(err)
@@ -131,28 +90,29 @@ func reverseString(str string) (string, error) {
 	result := string(rev)
 	return result, nil
 }
-func runRedisSequence(topic string, value string) error {
+
+func produceOutgoingTopic(str string) {
+	Produce("OutgoingTopic", str)
+}
+func saveRedisTriggerOutboundTopicKafka(topic string, value string) error {
 	fmt.Println("Running Sequence")
+	// save topic to redis
 	emitToRedis(topic, value)
+
+	// read topic from redis
 	message, err := readFromRedis(topic)
 	if err != nil {
 		return err
 	}
 	fmt.Println("Received Message: ", message)
+
+	// reverse message
 	reversed, err := reverseString(message)
 	if err != nil {
 		return err
 	}
 
-	Produce("outgoing", reversed)
+	// produce reversed message to Kafka
+	produceOutgoingTopic(reversed)
 	return nil
-}
-
-func ReadOutgoingFromRedis() (string, error) {
-	outgoing, err := readFromRedis("outgoing")
-	if err != nil {
-		return "", err
-	}
-	// fmt.Println(outgoing)
-	return outgoing, nil
 }

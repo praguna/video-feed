@@ -34,7 +34,7 @@ func Produce(topic string, value string) {
 	err := producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 		Value:          []byte(value),
-		Headers:        []kafka.Header{{Key: "messages", Value: []byte("messages feed header value")}},
+		Headers:        []kafka.Header{{Key: "InboundTopic", Value: []byte("InboundTopic feed header value")}},
 	}, deliveryChan)
 
 	e := <-deliveryChan
@@ -48,11 +48,8 @@ func Produce(topic string, value string) {
 		log.Printf("\n\n\n\nProduced %s [%d] at offset %v\n\n\n",
 			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
 	}
-
 	if err != nil {
 		log.Printf("Error in writing value : %v \n", err)
 	}
-
 	close(deliveryChan)
-
 }

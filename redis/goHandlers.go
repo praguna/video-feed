@@ -7,7 +7,7 @@ import (
 )
 
 func SetRedisTopic(topic string, message string) error {
-	fmt.Println("Setting messages in redis")
+	fmt.Println("Setting InboundTopic in redis")
 	conn := Pool.Get()
 	defer conn.Close()
 	key := topic
