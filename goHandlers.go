@@ -24,3 +24,7 @@ func ConsumeFromOutgoingTopic(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write([]byte(result))
 }
+
+func StartConsumer(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("bananas"))
+}

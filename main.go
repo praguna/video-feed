@@ -13,13 +13,13 @@ import (
 func main() {
 
 	router := mux.NewRouter()
-	router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Pong !!\n"))
-	})
 
-	router.HandleFunc("/produce-to-incoming-topic", ProduceToIncomingTopic)
+	// TODO: Set this route to start a perpetual consumer that listens for topic updates
+	router.HandleFunc("/start-consumer", StartConsumer)
 
 	router.HandleFunc("/consume-from-outgoing-topic", ConsumeFromOutgoingTopic)
+
+	router.HandleFunc("/produce-to-incoming-topic", ProduceToIncomingTopic)
 
 	http.Handle("/", router)
 
