@@ -31,7 +31,7 @@ func Consumer(topics []string) {
 	if err != nil {
 		fmt.Printf("Failed to create consumer: %s", err)
 	}
-	log.Printf("Created Consumer %v", c)
+	// log.Printf("Created Consumer %v", c)
 	err = c.SubscribeTopics(topics, nil)
 	for {
 		select {

@@ -1,6 +1,9 @@
 package kafka
 
 import (
+	"os"
+	"time"
+
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -20,13 +23,14 @@ func InitProducer() {
 		panic(err)
 	}
 
-	log.Printf("Created Producer %v", producer)
+	// log.Printf("Created Producer %v", producer)
 
 }
 
 func Produce(topic string, value string) {
+	start := time.Now()
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	log.Print("Producing ", topic, " as ", value)
+
 	deliveryChan := make(chan kafka.Event)
 
 	err := producer.Produce(&kafka.Message{
@@ -42,7 +46,12 @@ func Produce(topic string, value string) {
 	if m.TopicPartition.Error != nil {
 		log.Printf("Delivery failed: %v", m.TopicPartition.Error)
 	} else {
-		log.Print("Initializing Kafka")
+		end := time.Now()
+		duration := end.Sub(start)
+		log := zerolog.New(os.Stdout).With().
+			Timestamp().
+			Str("app", "KafRedigo").Dur("Duration", duration).
+			Logger()
 		log.Printf("Produced %s [%d] at offset %v",
 			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
 	}
