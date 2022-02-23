@@ -1,14 +1,28 @@
 package main
 
-//////////
 import (
-	"log"
+	"fmt"
 	"net/http"
+	"time"
 	"video-feed/kafka"
 	"video-feed/redis"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/zerolog"
 )
+
+func launchServer() error {
+	start := time.Now()
+
+	err := http.ListenAndServe(":4001", nil)
+	if err != nil {
+		fmt.Printf("Server error %v :", err)
+	}
+	end := time.Now()
+	duration := end.Sub(start)
+	fmt.Println(duration)
+	return nil
+}
 
 func main() {
 
@@ -18,13 +32,10 @@ func main() {
 
 	http.Handle("/", router)
 
-	log.Println("Initializing redis pool: ")
 	redis.Init()
 	go kafka.InitProducer()
-	go kafka.Consumer([]string{"InboundTopic", "OutgoingTopic"})
-	log.Println("InboundTopic Topic App Listening on :4000")
-	err := http.ListenAndServe(":4000", nil)
-	if err != nil {
-		log.Printf("Server error %v :", err)
-	}
+	go kafka.Consumer([]string{"InboundTopic", "OutboundTopic"})
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
+	launchServer()
 }

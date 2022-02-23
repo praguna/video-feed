@@ -1,10 +1,9 @@
 package kafka
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var producer *kafka.Producer
@@ -17,18 +16,17 @@ func InitProducer() {
 	producer, err = kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
 
 	if err != nil {
-		log.Println("Failed to create producer")
+		log.Print("Failed to create producer")
 		panic(err)
 	}
 
-	log.Printf("Created Producer %v\n", producer)
+	log.Printf("Created Producer %v", producer)
 
 }
 
 func Produce(topic string, value string) {
-	log.Printf("\n\n\n ********* \n\nSTART\n\n *********\n\n\n\n")
-
-	fmt.Println("Producing", topic, "as", value)
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Print("Producing ", topic, " as ", value)
 	deliveryChan := make(chan kafka.Event)
 
 	err := producer.Produce(&kafka.Message{
@@ -42,14 +40,14 @@ func Produce(topic string, value string) {
 	m := e.(*kafka.Message)
 
 	if m.TopicPartition.Error != nil {
-		log.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
+		log.Printf("Delivery failed: %v", m.TopicPartition.Error)
 	} else {
-		log.Printf("\n\n\n\nInitializing Kafka\n\n\n")
-		log.Printf("\n\n\n\nProduced %s [%d] at offset %v\n\n\n",
+		log.Print("Initializing Kafka")
+		log.Printf("Produced %s [%d] at offset %v",
 			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
 	}
 	if err != nil {
-		log.Printf("Error in writing value : %v \n", err)
+		log.Printf("Error in writing value : %v ", err)
 	}
 	close(deliveryChan)
 }
