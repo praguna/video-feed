@@ -14,7 +14,7 @@ import (
 func launchServer() error {
 	start := time.Now()
 
-	err := http.ListenAndServe(":4001", nil)
+	err := http.ListenAndServe(":4002", nil)
 	if err != nil {
 		fmt.Printf("Server error %v :", err)
 	}

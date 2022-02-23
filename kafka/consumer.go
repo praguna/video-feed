@@ -105,7 +105,17 @@ func reverseString(str string) (string, error) {
 }
 
 func produceOutboundTopic(str string) {
+	startTime := time.Now()
 	Produce("OutboundTopic", str)
+	endTime := time.Now()
+
+	diff := endTime.Sub(startTime)
+
+	log := zerolog.New(os.Stdout).With().Dur("Duration", diff).
+		Timestamp().
+		Str("app", "KafRedigo").
+		Logger()
+	log.Print("Produced to OutboundTopic Topic")
 }
 func saveRedisTriggerOutboundTopicKafka(topic string, value string) error {
 	// save topic to redis
